@@ -4,10 +4,16 @@ from PyQt5 import QtWidgets, uic
 import conndb
 
 class user_management(QtWidgets.QWidget):
-    def __init__(self):
+
+    def __init__(self):     # funcion que se ejecuta al iniciar la clase
         super(user_management, self).__init__()
         uic.loadUi("user_management.ui", self)
         self.setWindowTitle("Gestión de Usuarios")
+
+        header = self.tableWidget.horizontalHeader()
+        header.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+
         self.pushButton.clicked.connect(self.loadData)
         self.pushButton_Guardar.clicked.connect(self.saveData)
         self.pushButton_Eliminar.clicked.connect(self.deletData)
@@ -15,7 +21,7 @@ class user_management(QtWidgets.QWidget):
         self.loadData()
 
 
-    def loadData(self):
+    def loadData(self):     # función para cargar los datos del uruario en la tabla
         conn = conndb.conndb()
         strsql = "SELECT * FROM usuario"
         result = conn.queryResult(strsql)
@@ -29,7 +35,7 @@ class user_management(QtWidgets.QWidget):
             self.tableWidget.setItem(row, 4, QtWidgets.QTableWidgetItem(str(user[4])))
             row = row + 1
 
-    def saveData(self):
+    def saveData(self):     # función para actualizar los datos del usuario seleccionado
         id = self.lineEdit_Id.text()
         username = self.lineEdit_Username.text()
         password = self.lineEdit_Pass.text()
@@ -47,7 +53,7 @@ class user_management(QtWidgets.QWidget):
         self.loadData()
 
 
-    def deletData(self):
+    def deletData(self):    # funcion para eliminar los datos del usuario seleccionado
         id = self.lineEdit_Id.text()
         strsql = "DELETE FROM usuario WHERE id='"+id+"'"
         conn = conndb.conndb()
@@ -55,7 +61,7 @@ class user_management(QtWidgets.QWidget):
         self.loadData()
 
 
-    def getItem(self):
+    def getItem(self):      # funcion para mostrar en las cajas de texto los datos del usuario seleccionado de la tabla
         row = self.tableWidget.currentRow()
 
         rowItemId = self.tableWidget.item(row, 0).text()

@@ -14,7 +14,8 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: rgb(64, 65, 66);</string>
+   <string notr="true">background-color: rgb(64, 65, 66);
+color: rgb(255, 255, 255);</string>
   </property>
   <widget class="QLineEdit" name="lineEdit_Username">
    <property name="geometry">

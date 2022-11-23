@@ -110,7 +110,7 @@
   </action>
   <action name="actionClientes">
    <property name="text">
-    <string>Clientes</string>
+    <string>Gestionar Clientes</string>
    </property>
   </action>
   <action name="actionAntecedentes">

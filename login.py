@@ -1,5 +1,6 @@
 # This Python file uses the following encoding: utf-8
 from PyQt5 import QtWidgets, uic
+from PyQt5.QtWidgets import QMessageBox
 import conndb
 
 class login(QtWidgets.QDialog):
@@ -18,3 +19,6 @@ class login(QtWidgets.QDialog):
         if len(result)==1:
             self.result = result
             self.close()
+        else:
+            QMessageBox.about(self, "Iniciar Sesión", "Acceso Denegado")
+

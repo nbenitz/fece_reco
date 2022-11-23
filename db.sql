@@ -17,6 +17,26 @@
 CREATE DATABASE IF NOT EXISTS `facereco` /*!40100 DEFAULT CHARACTER SET latin1 COLLATE latin1_spanish_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `facereco`;
 
+-- Volcando estructura para tabla facereco.cliente
+CREATE TABLE IF NOT EXISTS `cliente` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `CI` char(10) COLLATE latin1_spanish_ci NOT NULL DEFAULT '0',
+  `Nombre` char(50) COLLATE latin1_spanish_ci NOT NULL DEFAULT '0',
+  `Apellido` char(50) COLLATE latin1_spanish_ci NOT NULL DEFAULT '0',
+  `Telefono` char(50) COLLATE latin1_spanish_ci DEFAULT '0',
+  `Direccion` char(100) COLLATE latin1_spanish_ci DEFAULT '0',
+  `Activo` int NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+
+-- Volcando datos para la tabla facereco.cliente: ~0 rows (aproximadamente)
+/*!40000 ALTER TABLE `cliente` DISABLE KEYS */;
+INSERT INTO `cliente` (`id`, `CI`, `Nombre`, `Apellido`, `Telefono`, `Direccion`, `Activo`) VALUES
+	(1, '4555666', 'Marcelo', 'González', '0981333555', 'José María Alfonzo Godoy', 1),
+	(2, '5333000', 'Pedro', 'Martínez', '0981000111', 'Calle Giménez', 1),
+	(4, '523455', 'Alfredo', 'agaggdfg', 'fgsghs', 'sefrsfh dfgfdfg', 1);
+/*!40000 ALTER TABLE `cliente` ENABLE KEYS */;
+
 -- Volcando estructura para tabla facereco.usuario
 CREATE TABLE IF NOT EXISTS `usuario` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
@@ -27,11 +47,11 @@ CREATE TABLE IF NOT EXISTS `usuario` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
 
--- Volcando datos para la tabla facereco.usuario: ~2 rows (aproximadamente)
+-- Volcando datos para la tabla facereco.usuario: ~1 rows (aproximadamente)
 /*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
 INSERT INTO `usuario` (`id`, `nombre`, `pass`, `privilegio`, `activo`) VALUES
 	(1, 'admin', '123', 'Administrador', 1),
-	(2, 'noelia', '555', 'Usuario', 1);
+	(2, 'noelia', '123456', 'Usuario', 1);
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
