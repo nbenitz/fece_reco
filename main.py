@@ -14,7 +14,8 @@ class main(QtWidgets.QMainWindow):
         super().__init__(*args, **kwargs)
         uic.loadUi("main.ui", self)
         self.setWindowTitle("Identificación de Antecedentes")
-        #self.mdiArea.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        self.showMaximized()
+
         self.logout()
         self.actionLogin.triggered.connect(self.login)
         self.actionLogout.triggered.connect(self.logout)
@@ -65,6 +66,15 @@ class main(QtWidgets.QMainWindow):
         mdi.resize(640, 480)
 
 app = QtWidgets.QApplication(sys.argv)
+
+screen = app.primaryScreen()
+#print('Screen: %s' % screen.name())
+#size = screen.size()
+#print('Size: %d x %d' % (size.width(), size.height()))
+rect = screen.availableGeometry()
+#print('Available: %d x %d' % (rect.width(), rect.height()))
+
 widget = main()
+widget.mdiArea.resize(rect.width() - 10, rect.height() - 70)
 widget.show()
 app.exec()

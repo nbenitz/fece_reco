@@ -6,14 +6,14 @@ class conndb:
         pass
 
     def queryResult(self, strsql):
-        cnx = mysql.connector.connect(user='root', password='12345', host='127.0.0.1', database='faceReco')
+        cnx = mysql.connector.connect(user='root', password='Z.Checoslovaquia#', host='127.0.0.1', database='faceReco')
         conn =  cnx.cursor()
         conn.execute(strsql)
         result = conn.fetchall()
         return result
 
     def queryExecute(self, strsql):
-        cnx = mysql.connector.connect(user='root', password='12345', host='127.0.0.1', database='faceReco')
+        cnx = mysql.connector.connect(user='root', password='Z.Checoslovaquia#', host='127.0.0.1', database='faceReco')
         conn =  cnx.cursor()
         conn.execute(strsql)
         cnx.commit()

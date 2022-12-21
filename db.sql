@@ -25,16 +25,18 @@ CREATE TABLE IF NOT EXISTS `cliente` (
   `Apellido` char(50) COLLATE latin1_spanish_ci NOT NULL DEFAULT '0',
   `Telefono` char(50) COLLATE latin1_spanish_ci DEFAULT '0',
   `Direccion` char(100) COLLATE latin1_spanish_ci DEFAULT '0',
+  `Foto` char(150) CHARACTER SET latin1 COLLATE latin1_spanish_ci DEFAULT NULL,
   `Activo` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
 
--- Volcando datos para la tabla facereco.cliente: ~0 rows (aproximadamente)
+-- Volcando datos para la tabla facereco.cliente: ~3 rows (aproximadamente)
 /*!40000 ALTER TABLE `cliente` DISABLE KEYS */;
-INSERT INTO `cliente` (`id`, `CI`, `Nombre`, `Apellido`, `Telefono`, `Direccion`, `Activo`) VALUES
-	(1, '4555666', 'Marcelo', 'González', '0981333555', 'José María Alfonzo Godoy', 1),
-	(2, '5333000', 'Pedro', 'Martínez', '0981000111', 'Calle Giménez', 1),
-	(4, '523455', 'Alfredo', 'agaggdfg', 'fgsghs', 'sefrsfh dfgfdfg', 1);
+INSERT INTO `cliente` (`id`, `CI`, `Nombre`, `Apellido`, `Telefono`, `Direccion`, `Foto`, `Activo`) VALUES
+	(1, '4555666', 'Marcelo', 'González', '0981333555', 'José María Alfonzo Godoy', NULL, 1),
+	(2, '5333000', 'Pedro', 'Martínez', '0981000111', 'Calle Giménez', NULL, 1),
+	(4, '523455', 'Alfredo', 'agaggdfg', 'fgsghs', 'sefrsfh dfgfdfg', NULL, 1),
+	(9, '346457', 'Luis Raúl', 'González Pedrozo', '', '', 'images/faces/Luis_346457.jpg', 1);
 /*!40000 ALTER TABLE `cliente` ENABLE KEYS */;
 
 -- Volcando estructura para tabla facereco.usuario

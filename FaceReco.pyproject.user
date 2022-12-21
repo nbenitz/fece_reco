@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 8.0.2, 2022-11-21T12:05:35. -->
+<!-- Written by QtCreator 8.0.2, 2022-12-21T09:16:41. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -142,7 +142,6 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">main.py</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">PythonEditor.RunConfiguration.C:/Users/Nestor/Dev/FaceReco/main.py</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">C:/Users/Nestor/Dev/FaceReco/main.py</value>
-    <value type="QString" key="PythonEditor.RunConfiguation.Interpreter">{23255a15-e15e-4993-a554-03d181145de9}</value>
     <value type="QString" key="PythonEditor.RunConfiguation.Script">C:\Users\Nestor\Dev\FaceReco\main.py</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>

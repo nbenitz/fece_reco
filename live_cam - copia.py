@@ -2,9 +2,7 @@ from PyQt5 import QtGui, QtCore
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QVBoxLayout
 from PyQt5.QtGui import QPixmap
 #import sys
-import face_recognition
 import cv2
-import os
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QThread
 import numpy as np
 
@@ -17,54 +15,29 @@ class VideoThread(QThread):
         self._run_flag = True
 
     def run(self):
-        # Codificar los rostros extraidos
-        imageFacesPath = "images/faces"
-        facesEncodings = []
-        facesNames = []
-        for file_name in os.listdir(imageFacesPath):
-             image = cv2.imread(imageFacesPath + "/" + file_name)
-             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-             f_coding = face_recognition.face_encodings(image, known_face_locations=[(0, 150, 150, 0)])[0]
-             facesEncodings.append(f_coding)
-             facesNames.append(file_name.split(".")[0])
-        # LEYENDO VIDEO
-        cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-        # Detector facial
-        faceClassif = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+        # capture from web cam
+        cap = cv2.VideoCapture(0)
+        cascPath = "haarcascade_frontalface_default.xml"
+        # Create the haar cascade
+        faceCascade = cv2.CascadeClassifier(cascPath)
 
         while self._run_flag:
+            # Capture frame-by-frame
             ret, frame = cap.read()
-            if ret == False:
-                break
-            frame = cv2.flip(frame, 1)
-            orig = frame.copy()
-            faces = faceClassif.detectMultiScale(
-                frame,
+            # Our operations on the frame come here
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            # Detect faces in the image
+            faces = faceCascade.detectMultiScale(
+                gray,
                 scaleFactor=1.1,
-                minNeighbors=10,
-                minSize=(50, 50)
+                minNeighbors=5,
+                minSize=(30, 30)
+                #flags = cv2.CV_HAAR_SCALE_IMAGE
             )
-
+            print("Found {0} faces!".format(len(faces)))
+            # Draw a rectangle around the faces
             for (x, y, w, h) in faces:
-                face = orig[y:y + h, x:x + w]
-                face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
-                actual_face_encoding = face_recognition.face_encodings(face, known_face_locations=[(0, w, h, 0)])[0]
-                result = face_recognition.compare_faces(facesEncodings, actual_face_encoding)
-                #print(result)
-                if True in result:
-                    index = result.index(True)
-                    name = facesNames[index].split('_')[0]
-                    color = (125, 220, 0)
-                    cv2.rectangle(frame, (x, y + h), (x + w, y + h + 30), color, -1)
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
-                    cv2.putText(frame, name, (x, y + h + 25), 2, 1, (255, 255, 255), 2, cv2.LINE_AA)
-                #else:
-                    #name = "Desconocido"
-                    #color = (50, 50, 255)
-                #cv2.rectangle(frame, (x, y + h), (x + w, y + h + 30), color, -1)
-                #cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
-                #cv2.putText(frame, name, (x, y + h + 25), 2, 1, (255, 255, 255), 2, cv2.LINE_AA)
-
+                cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
             if ret:
                 self.change_pixmap_signal.emit(frame)
 
@@ -133,3 +106,9 @@ class live_cam(QWidget):
         convert_to_Qt_format = QtGui.QImage(rgb_image.data, w, h, bytes_per_line, QtGui.QImage.Format_RGB888)
         p = convert_to_Qt_format.scaled(self.disply_width, self.display_height, Qt.KeepAspectRatio)
         return QPixmap.fromImage(p)
+    
+#if __name__=="__main__":
+#    app = QApplication(sys.argv)
+#    a = App()
+#    a.show()
+#    sys.exit(app.exec_())
