@@ -9,6 +9,7 @@ import login
 import live_cam
 import cliente
 
+
 class main(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -23,13 +24,12 @@ class main(QtWidgets.QMainWindow):
         self.actionGestion_de_Usuarios.triggered.connect(self.user_mgt)
         self.actionClientes.triggered.connect(self.clientes_show)
 
-
     def login(self):
         self.lg = login.login()
         self.lg.exec()
         result = self.lg.result
         try:
-            if len(result)==1:
+            if len(result) == 1:
                 self.menuAdmin.setEnabled(True)
                 self.menuCamara.setEnabled(True)
                 self.menuClientes.setEnabled(True)
@@ -46,12 +46,12 @@ class main(QtWidgets.QMainWindow):
 
     def user_mgt(self):
         self.usr_mgt_w = usr_mgt.user_management()
-        #self.mdiArea.addSubWindow(self.usr_mgt_w)
+        # self.mdiArea.addSubWindow(self.usr_mgt_w)
         self.usr_mgt_w.show()
 
     def clientes_show(self):
         self.clientes_frm = cliente.cliente()
-        #self.mdiArea.addSubWindow(self.usr_mgt_w)
+        # self.mdiArea.addSubWindow(self.usr_mgt_w)
         self.clientes_frm.show()
 
     def l_cam(self):
@@ -65,14 +65,15 @@ class main(QtWidgets.QMainWindow):
         self.live_cam.show()
         mdi.resize(640, 480)
 
+
 app = QtWidgets.QApplication(sys.argv)
 
 screen = app.primaryScreen()
-#print('Screen: %s' % screen.name())
-#size = screen.size()
-#print('Size: %d x %d' % (size.width(), size.height()))
+# print('Screen: %s' % screen.name())
+# size = screen.size()
+# print('Size: %d x %d' % (size.width(), size.height()))
 rect = screen.availableGeometry()
-#print('Available: %d x %d' % (rect.width(), rect.height()))
+# print('Available: %d x %d' % (rect.width(), rect.height()))
 
 widget = main()
 widget.mdiArea.resize(rect.width() - 10, rect.height() - 70)

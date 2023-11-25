@@ -3,6 +3,7 @@
 from PyQt5 import QtWidgets, uic
 import conndb
 
+
 class user_management(QtWidgets.QWidget):
 
     def __init__(self):     # funcion que se ejecuta al iniciar la clase
@@ -19,7 +20,6 @@ class user_management(QtWidgets.QWidget):
         self.pushButton_Eliminar.clicked.connect(self.deletData)
         self.tableWidget.clicked.connect(self.getItem)
         self.loadData()
-
 
     def loadData(self):     # función para cargar los datos del uruario en la tabla
         conn = conndb.conndb()
@@ -52,14 +52,12 @@ class user_management(QtWidgets.QWidget):
         conn.queryExecute(strsql)
         self.loadData()
 
-
     def deletData(self):    # funcion para eliminar los datos del usuario seleccionado
         id = self.lineEdit_Id.text()
         strsql = "DELETE FROM usuario WHERE id='"+id+"'"
         conn = conndb.conndb()
         conn.queryExecute(strsql)
         self.loadData()
-
 
     def getItem(self):      # funcion para mostrar en las cajas de texto los datos del usuario seleccionado de la tabla
         row = self.tableWidget.currentRow()

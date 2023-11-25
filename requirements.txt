@@ -1,0 +1,6 @@
+mysql-connector-python
+PyQt5
+face_recognition
+opencv-python
+opencv-python-headless
+imutils
