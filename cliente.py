@@ -157,8 +157,8 @@ class cliente(QtWidgets.QWidget):
     def saveImage(self, name):
         pixmap = self.lblFoto.pixmap()
 
-        if pixmap.isNull():
-            QMessageBox.about(self, "Editar Cliente", "El pixmap es nulo. No se puede guardar la imagen.")
+        if pixmap is None:
+            # QMessageBox.about(self, "Editar Cliente", "El pixmap es nulo. No se puede guardar la imagen.")
             return
 
         # Verificar la existencia del directorio de destino
@@ -211,30 +211,41 @@ class cliente(QtWidgets.QWidget):
             apellido = self.txtApellido.text()
             telefono = self.txtTelefono.text()
             direccion = self.txtDireccion.text()
-            image_path = 'images/faces/' + nombre.split()[0] + '_' + ci + '.jpg'
             activo = int(self.chkActivo.isChecked())
-            strsql = "UPDATE cliente SET ci='{}', nombre='{}', apellido='{}', telefono='{}', direccion='{}', foto='{}', activo='{}' WHERE id='{}'".format(
-                ci,
-                nombre,
-                apellido,
-                telefono,
-                direccion,
-                image_path,
-                activo,
-                id)
 
-            conn = conndb.conndb()
-            try:
-                conn.queryExecute(strsql)
-                self.tabWidget.setTabText(1, "Nuevo Cliente")
-                # mostrar la pestaña 0 (lista de clientes)
-                self.tabWidget.setCurrentIndex(0)
-                self.loadData()
-                # guardar foto
-                self.saveImage(nombre.split()[0] + '_' + ci)
-                QMessageBox.about(self, "Editar Cliente", "Los datos del cliente se actualizaron correctamente")
-            except Exception as e:
-                QMessageBox.about(self, "Error", "Hubo un error al actualizar los datos del cliente")
+            if ci:
+                if nombre:
+                    if apellido:
+                        image_path = f'images/faces/{nombre.split()[0]}_{ci}.jpg' if self.lblFoto.pixmap() else ''
+                        strsql = "UPDATE cliente SET ci='{}', nombre='{}', apellido='{}', telefono='{}', direccion='{}', foto='{}', activo='{}' WHERE id='{}'".format(
+                            ci,
+                            nombre,
+                            apellido,
+                            telefono,
+                            direccion,
+                            image_path,
+                            activo,
+                            id
+                        )
+
+                        conn = conndb.conndb()
+                        try:
+                            conn.queryExecute(strsql)
+                            self.tabWidget.setTabText(1, "Nuevo Cliente")
+                            # mostrar la pestaña 0 (lista de clientes)
+                            self.tabWidget.setCurrentIndex(0)
+                            self.loadData()
+                            # guardar foto
+                            self.saveImage(nombre.split()[0] + '_' + ci)
+                            QMessageBox.about(self, "Editar Cliente", "Los datos del cliente se actualizaron correctamente")
+                        except Exception as e:
+                            QMessageBox.about(self, "Error", "Hubo un error al actualizar los datos del cliente")
+                    else:
+                        QMessageBox.about(self, "Error", "El campo Apellido es obligatorio")
+                else:
+                    QMessageBox.about(self, "Error", "El campo Nombre es obligatorio")
+            else:
+                QMessageBox.about(self, "Error", "El campo C.I. Nro. es obligatorio")
         else:
             self.saveData()
 
@@ -246,26 +257,37 @@ class cliente(QtWidgets.QWidget):
             apellido = self.txtApellido.text()
             telefono = self.txtTelefono.text()
             direccion = self.txtDireccion.text()
-            image_path = 'images/faces/' + nombre.split()[0] + '_' + ci + '.jpg'
-            strsql = "INSERT INTO cliente (ci, nombre, apellido, telefono, direccion, foto) VALUES('{}', '{}', '{}', '{}', '{}', '{}')".format(
-                ci,
-                nombre,
-                apellido,
-                telefono,
-                direccion,
-                image_path)
 
-            conn = conndb.conndb()
-            try:
-                conn.queryExecute(strsql)
-                QMessageBox.about(self, "Nuevo Cliente", "Los datos del cliente se guardaron correctamente")
-                # guardar foto
-                self.saveImage(nombre.split()[0] + '_' + ci)
-                # mostrar la pestaña 0 (lista de clientes)
-                self.tabWidget.setCurrentIndex(0)
-                self.loadData()
-            except:
-                QMessageBox.about(self, "Error", "Hubo un error al guardar los datos del cliente")
+            if ci:
+                if nombre:
+                    if apellido:
+                        image_path = f'images/faces/{nombre.split()[0]}_{ci}.jpg' if self.lblFoto.pixmap() else ''
+                        strsql = "INSERT INTO cliente (ci, nombre, apellido, telefono, direccion, foto) VALUES('{}', '{}', '{}', '{}', '{}', '{}')".format(
+                            ci,
+                            nombre,
+                            apellido,
+                            telefono,
+                            direccion,
+                            image_path
+                        )
+
+                        conn = conndb.conndb()
+                        try:
+                            conn.queryExecute(strsql)
+                            # guardar foto
+                            self.saveImage(f'{nombre.split()[0]}_{ci}')
+                            # mostrar la pestaña 0 (lista de clientes)
+                            self.tabWidget.setCurrentIndex(0)
+                            self.loadData()
+                            QMessageBox.about(self, "Nuevo Cliente", "Los datos del cliente se guardaron correctamente")
+                        except Exception as e:
+                            QMessageBox.about(self, "Error", "Hubo un error al guardar los datos del cliente")
+                    else:
+                        QMessageBox.about(self, "Error", "El campo Apellido es obligatorio")
+                else:
+                    QMessageBox.about(self, "Error", "El campo Nombre es obligatorio")
+            else:
+                QMessageBox.about(self, "Error", "El campo C.I. Nro. es obligatorio")
 
     def deleteData(self):
         """ funcion para eliminar los datos del usuario seleccionado """
@@ -305,8 +327,9 @@ class cliente(QtWidgets.QWidget):
             self.txtApellido.setText(apellido)
             self.txtTelefono.setText(telefono)
             self.txtDireccion.setText(direccion)
-            pixmap = QPixmap(imagePath).scaled(320, 320, aspectRatioMode=Qt.KeepAspectRatio)
-            self.lblFoto.setPixmap(pixmap)
+            if imagePath:
+                pixmap = QPixmap(imagePath).scaled(320, 320, aspectRatioMode=Qt.KeepAspectRatio)
+                self.lblFoto.setPixmap(pixmap)
             self.chkActivo.setChecked(int(activo))
 
             # mostrar caja de texto para ID y CheckBox para Activo
@@ -345,6 +368,8 @@ class cliente(QtWidgets.QWidget):
                 self.btnCamara.setText("Iniciar Cámara")
 
     def cancelar(self):
+        self.thread.stop()
+        self.btnCamara.setText("Iniciar Cámara")
         self.tabWidget.setTabText(1, "Nuevo Cliente")
         # mostrar la pestaña 0 (lista de clientes)
         self.tabWidget.setCurrentIndex(0)
