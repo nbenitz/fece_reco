@@ -37,9 +37,9 @@ class VideoThread(QThread):
                 frame,
                 scaleFactor=1.1,
                 minNeighbors=10,
-                minSize=(70, 70)
+                minSize=(30, 30)
             )
-            print("Found {0} faces!".format(len(faces)))
+            print(f'Found {len(faces)} faces.')
 
             # Draw a rectangle around the faces
             for (x, y, w, h) in faces:
@@ -50,21 +50,13 @@ class VideoThread(QThread):
 
         '''When stop'''
         print("_run_flag 2:", self._run_flag)
-        ret, frame = cap.read()
-        faces = faceClassif.detectMultiScale(
-            frame,
-            scaleFactor=1.1,
-            minNeighbors=10,
-            minSize=(70, 70)
-        )
-        print("Found {0} faces!".format(len(faces)))
         face = frame
         for (x, y, w, h) in faces:
             face = frame[y:y + h, x:x + w]
             face = cv2.resize(face, (320, 320))
 
         if len(faces) < 1:
-            face = cv2.resize(face, (50, 50))
+            face = cv2.resize(face, (320, 320))
 
         self.change_pixmap_signal.emit(face)
         # shut down capture system
@@ -106,7 +98,6 @@ class cliente(QtWidgets.QWidget):
         self.loadData()
         self.tabWidget.setCurrentIndex(0)
 
-
     def openImage(self):
         if self.btnCamara.text() == "Capturar":
             self.thread.stop()
@@ -114,7 +105,6 @@ class cliente(QtWidgets.QWidget):
         imagePath, _ = QFileDialog.getOpenFileName(self, 'Abrir Imagen', 'C:\\', 'Image files (*.jpg *.jpeg)')
         if len(imagePath) > 0:
             self.recortarRostro(imagePath)
-
 
     def recortarRostro(self, imagePath):
         faceClassif = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
@@ -124,7 +114,7 @@ class cliente(QtWidgets.QWidget):
             image,
             scaleFactor=1.1,
             minNeighbors=10,
-            minSize=(70, 70)
+            minSize=(30, 30)
         )
         face = image
         for (x, y, w, h) in faces:
@@ -132,12 +122,11 @@ class cliente(QtWidgets.QWidget):
             face = cv2.resize(face, (320, 320))
 
         if len(faces) < 1:
-            face = cv2.resize(face, (50, 50))
+            face = cv2.resize(face, (320, 320))
 
         self.update_image(face)
             #cv2.imwrite("images/faces/" + str(count) + ".jpg", face)
             #count += 1
-
 
     def runCamera(self):
         if self.btnCamara.text() == "Iniciar Cámara":
@@ -146,7 +135,6 @@ class cliente(QtWidgets.QWidget):
         else:
             self.thread.stop()
             self.btnCamara.setText("Iniciar Cámara")
-
 
     @pyqtSlot(np.ndarray)
     def update_image(self, cv_img):
@@ -157,7 +145,6 @@ class cliente(QtWidgets.QWidget):
         qt_img = self.convert_cv_qt(cv_img)
         self.lblFoto.setPixmap(qt_img)
 
-
     def convert_cv_qt(self, cv_img):
         """Convert from an opencv image to QPixmap"""
         rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
@@ -166,7 +153,6 @@ class cliente(QtWidgets.QWidget):
         convert_to_Qt_format = QtGui.QImage(rgb_image.data, w, h, bytes_per_line, QtGui.QImage.Format_RGB888)
         p = convert_to_Qt_format.scaled(320, 320, Qt.KeepAspectRatio)
         return QPixmap.fromImage(p)
-
 
     def saveImage(self, name):
         pixmap = self.lblFoto.pixmap()
@@ -192,10 +178,14 @@ class cliente(QtWidgets.QWidget):
         buffer.seek(0)
         image = Image.open(io.BytesIO(buffer.data()))
 
-        # Guardar la imagen
-        image.save(os.path.join(save_dir, f"{name}.jpg"))
+        # Redimensionar la imagen a 150x150 píxeles
+        resized_image = image.resize((150, 150))
 
-    def loadData(self):     # función para cargar los datos del uruario en la tabla
+        # Guardar la imagen
+        resized_image.save(os.path.join(save_dir, f"{name}.jpg"))
+
+    def loadData(self):
+        """ función para cargar los datos del uruario en la tabla """
         conn = conndb.conndb()
         strsql = "SELECT * FROM cliente"
         result = conn.queryResult(strsql)
@@ -212,8 +202,8 @@ class cliente(QtWidgets.QWidget):
             self.tableWidget.setItem(row, 7, QtWidgets.QTableWidgetItem(str(r[7])))
             row = row + 1
 
-    # función para actualizar los datos del usuario seleccionado
     def updateData(self):
+        """ función para actualizar los datos del usuario seleccionado """
         if self.tabWidget.tabText(1) == "Editar Cliente":
             id = self.txtId.text()
             ci = self.txtCI.text()
@@ -248,8 +238,8 @@ class cliente(QtWidgets.QWidget):
         else:
             self.saveData()
 
-    # función para actualizar los datos del usuario seleccionado
     def saveData(self):
+        """ función para actualizar los datos del usuario seleccionado """
         if self.tabWidget.tabText(1) == "Nuevo Cliente":
             ci = self.txtCI.text()
             nombre = self.txtNombre.text()
@@ -277,7 +267,8 @@ class cliente(QtWidgets.QWidget):
             except:
                 QMessageBox.about(self, "Error", "Hubo un error al guardar los datos del cliente")
 
-    def deleteData(self):    # funcion para eliminar los datos del usuario seleccionado
+    def deleteData(self):
+        """ funcion para eliminar los datos del usuario seleccionado """
         # capturar la fila seleccionada
         row = self.tableWidget.currentRow()
 
@@ -290,8 +281,8 @@ class cliente(QtWidgets.QWidget):
             QMessageBox.about(self, "Eliminar Cliente", "Cliente eliminado correctamente")
             self.loadData()
 
-    # funcion para mostrar en las cajas de texto los datos del usuario seleccionado de la tabla
     def getItem(self):
+        """ funcion para mostrar en las cajas de texto los datos del usuario seleccionado de la tabla """
         # capturar la fila seleccionada
         row = self.tableWidget.currentRow()
 
@@ -314,7 +305,8 @@ class cliente(QtWidgets.QWidget):
             self.txtApellido.setText(apellido)
             self.txtTelefono.setText(telefono)
             self.txtDireccion.setText(direccion)
-            self.lblFoto.setPixmap(QPixmap(imagePath))
+            pixmap = QPixmap(imagePath).scaled(320, 320, aspectRatioMode=Qt.KeepAspectRatio)
+            self.lblFoto.setPixmap(pixmap)
             self.chkActivo.setChecked(int(activo))
 
             # mostrar caja de texto para ID y CheckBox para Activo
