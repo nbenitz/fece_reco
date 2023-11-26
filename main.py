@@ -5,10 +5,10 @@ import os
 from PyQt5 import QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QMessageBox
 
-import user_management as usr_mgt
-import login
+from user_management import UserManagement
+from login import Login
 from live_cam import LiveCam
-import cliente
+from cliente import Cliente
 
 
 class main(QtWidgets.QMainWindow):
@@ -27,7 +27,7 @@ class main(QtWidgets.QMainWindow):
         self.actionClientes.triggered.connect(self.clientes_show)
 
     def login(self):
-        self.lg = login.login()
+        self.lg = Login()
         self.lg.exec()
         result = self.lg.result
         try:
@@ -47,13 +47,13 @@ class main(QtWidgets.QMainWindow):
         self.menuReportes.setEnabled(False)
 
     def user_mgt(self):
-        self.usr_mgt_w = usr_mgt.user_management()
-        # self.mdiArea.addSubWindow(self.usr_mgt_w)
-        self.usr_mgt_w.show()
+        self.usr_mgt_frm = UserManagement()
+        # self.mdiArea.addSubWindow(self.usr_mgt_frm)
+        self.usr_mgt_frm.show()
 
     def clientes_show(self):
-        self.clientes_frm = cliente.cliente()
-        # self.mdiArea.addSubWindow(self.usr_mgt_w)
+        self.clientes_frm = Cliente()
+        # self.mdiArea.addSubWindow(self.clientes_frm)
         self.clientes_frm.show()
 
     def l_cam(self):
@@ -78,6 +78,6 @@ rect = screen.availableGeometry()
 # print('Available: %d x %d' % (rect.width(), rect.height()))
 
 widget = main()
-widget.mdiArea.resize(rect.width() - 10, rect.height() - 70)
+widget.mdiArea.resize(rect.width() - 30, rect.height() - 70)
 widget.show()
 app.exec()

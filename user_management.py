@@ -4,10 +4,10 @@ from PyQt5 import QtWidgets, uic
 import conndb
 
 
-class user_management(QtWidgets.QWidget):
+class UserManagement(QtWidgets.QWidget):
 
-    def __init__(self):     # funcion que se ejecuta al iniciar la clase
-        super(user_management, self).__init__()
+    def __init__(self):
+        super(UserManagement, self).__init__()
         uic.loadUi("user_management.ui", self)
         self.setWindowTitle("Gestión de Usuarios")
 
@@ -15,13 +15,14 @@ class user_management(QtWidgets.QWidget):
         header.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
 
-        self.pushButton.clicked.connect(self.loadData)
-        self.pushButton_Guardar.clicked.connect(self.saveData)
-        self.pushButton_Eliminar.clicked.connect(self.deletData)
-        self.tableWidget.clicked.connect(self.getItem)
-        self.loadData()
+        self.pushButton.clicked.connect(self.load_data)
+        self.pushButton_Guardar.clicked.connect(self.save_data)
+        self.pushButton_Eliminar.clicked.connect(self.delet_data)
+        self.tableWidget.clicked.connect(self.get_item)
+        self.load_data()
 
-    def loadData(self):     # función para cargar los datos del uruario en la tabla
+    def load_data(self):
+        """ función para cargar los datos del uruario en la tabla """
         conn = conndb.conndb()
         strsql = "SELECT * FROM usuario"
         result = conn.queryResult(strsql)
@@ -35,7 +36,8 @@ class user_management(QtWidgets.QWidget):
             self.tableWidget.setItem(row, 4, QtWidgets.QTableWidgetItem(str(user[4])))
             row = row + 1
 
-    def saveData(self):     # función para actualizar los datos del usuario seleccionado
+    def save_data(self):
+        """ función para actualizar los datos del usuario seleccionado """
         id = self.lineEdit_Id.text()
         username = self.lineEdit_Username.text()
         password = self.lineEdit_Pass.text()
@@ -50,16 +52,18 @@ class user_management(QtWidgets.QWidget):
 
         conn = conndb.conndb()
         conn.queryExecute(strsql)
-        self.loadData()
+        self.load_data()
 
-    def deletData(self):    # funcion para eliminar los datos del usuario seleccionado
+    def delet_data(self):
+        """ funcion para eliminar los datos del usuario seleccionado """
         id = self.lineEdit_Id.text()
         strsql = "DELETE FROM usuario WHERE id='"+id+"'"
         conn = conndb.conndb()
         conn.queryExecute(strsql)
-        self.loadData()
+        self.load_data()
 
-    def getItem(self):      # funcion para mostrar en las cajas de texto los datos del usuario seleccionado de la tabla
+    def get_item(self):
+        """ funcion para mostrar en las cajas de texto los datos del usuario seleccionado de la tabla """
         row = self.tableWidget.currentRow()
 
         rowItemId = self.tableWidget.item(row, 0).text()

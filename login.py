@@ -3,9 +3,9 @@ from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QMessageBox
 import conndb
 
-class login(QtWidgets.QDialog):
+class Login(QtWidgets.QDialog):
     def __init__(self):
-        super(login, self).__init__()
+        super(Login, self).__init__()
         uic.loadUi("login.ui", self)
         self.setWindowTitle("Iniciar Sesión")
         self.pushButton_Login.clicked.connect(self.login)

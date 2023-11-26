@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QMessageBox, QFileDialog, QAction
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QThread
 from PIL import ImageQt
+from unidecode import unidecode
 import cv2
 import imutils
 import numpy as np
@@ -69,9 +70,9 @@ class VideoThread(QThread):
         self.wait()
 
 
-class cliente(QtWidgets.QWidget):
+class Cliente(QtWidgets.QWidget):
     def __init__(self):
-        super(cliente, self).__init__()
+        super(Cliente, self).__init__()
         uic.loadUi("cliente.ui", self)
         self.setWindowTitle("Gestión de Clientes")
 
@@ -87,26 +88,44 @@ class cliente(QtWidgets.QWidget):
         # connect its signal to the update_image slot
         self.thread.change_pixmap_signal.connect(self.update_image)
 
-        self.btnEditar.clicked.connect(self.getItem)
-        self.btnGuardar.clicked.connect(self.updateData)
-        self.btnCamara.clicked.connect(self.runCamera)
-        self.btnSubir.clicked.connect(self.openImage)
-        self.btnEliminar.clicked.connect(self.deleteData)
+        self.btnEditar.clicked.connect(self.get_item)
+        self.btnGuardar.clicked.connect(self.update_data)
+        self.btnCamara.clicked.connect(self.run_camera)
+        self.btnSubir.clicked.connect(self.open_image)
+        self.btnEliminar.clicked.connect(self.delete_data)
         self.btnCancelar.clicked.connect(self.cancelar)
         self.tabWidget.tabBarClicked.connect(self.tab_clicked)
 
-        self.loadData()
+        self.load_data()
         self.tabWidget.setCurrentIndex(0)
 
-    def openImage(self):
+    @pyqtSlot(np.ndarray)
+    def update_image(self, cv_img):
+        if cv_img.shape[0] == 50:
+            QMessageBox.about(self, "Cámara", "No se han detectado rostros en la foto")
+
+        """Updates the image_label with a new opencv image"""
+        qt_img = self.convert_cv_qt(cv_img)
+        self.lblFoto.setPixmap(qt_img)
+
+    def convert_cv_qt(self, cv_img):
+        """Convert from an opencv image to QPixmap"""
+        rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+        h, w, ch = rgb_image.shape
+        bytes_per_line = ch * w
+        convert_to_Qt_format = QtGui.QImage(rgb_image.data, w, h, bytes_per_line, QtGui.QImage.Format_RGB888)
+        p = convert_to_Qt_format.scaled(320, 320, Qt.KeepAspectRatio)
+        return QPixmap.fromImage(p)
+
+    def open_image(self):
         if self.btnCamara.text() == "Capturar":
             self.thread.stop()
             self.btnCamara.setText("Iniciar Cámara")
         imagePath, _ = QFileDialog.getOpenFileName(self, 'Abrir Imagen', 'C:\\', 'Image files (*.jpg *.jpeg)')
         if len(imagePath) > 0:
-            self.recortarRostro(imagePath)
+            self.recortar_rostro(imagePath)
 
-    def recortarRostro(self, imagePath):
+    def recortar_rostro(self, imagePath):
         faceClassif = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
         image = cv2.imread(imagePath)
         image = imutils.resize(image, width=800)
@@ -128,7 +147,7 @@ class cliente(QtWidgets.QWidget):
             #cv2.imwrite("images/faces/" + str(count) + ".jpg", face)
             #count += 1
 
-    def runCamera(self):
+    def run_camera(self):
         if self.btnCamara.text() == "Iniciar Cámara":
             self.thread.start()
             self.btnCamara.setText("Capturar")
@@ -136,25 +155,119 @@ class cliente(QtWidgets.QWidget):
             self.thread.stop()
             self.btnCamara.setText("Iniciar Cámara")
 
-    @pyqtSlot(np.ndarray)
-    def update_image(self, cv_img):
-        if cv_img.shape[0] == 50:
-            QMessageBox.about(self, "Cámara", "No se han detectado rostros en la foto")
+    def load_data(self):
+        """ función para cargar los datos del uruario en la tabla """
+        conn = conndb.conndb()
+        strsql = "SELECT * FROM cliente"
+        result = conn.queryResult(strsql)
+        row = 0
+        self.tableWidget.setRowCount(len(result))
+        for r in result:
+            self.tableWidget.setItem(row, 0, QtWidgets.QTableWidgetItem(str(r[0])))
+            self.tableWidget.setItem(row, 1, QtWidgets.QTableWidgetItem(r[1]))
+            self.tableWidget.setItem(row, 2, QtWidgets.QTableWidgetItem(r[2]))
+            self.tableWidget.setItem(row, 3, QtWidgets.QTableWidgetItem(r[3]))
+            self.tableWidget.setItem(row, 4, QtWidgets.QTableWidgetItem(r[4]))
+            self.tableWidget.setItem(row, 5, QtWidgets.QTableWidgetItem(r[5]))
+            self.tableWidget.setItem(row, 6, QtWidgets.QTableWidgetItem(r[6]))
+            self.tableWidget.setItem(row, 7, QtWidgets.QTableWidgetItem(str(r[7])))
+            row = row + 1
 
-        """Updates the image_label with a new opencv image"""
-        qt_img = self.convert_cv_qt(cv_img)
-        self.lblFoto.setPixmap(qt_img)
+    def save_data(self):
+        """ función para actualizar los datos del usuario seleccionado """
+        if self.tabWidget.tabText(1) == "Nuevo Cliente":
+            ci = self.txtCI.text()
+            nombre = self.txtNombre.text()
+            apellido = self.txtApellido.text()
+            telefono = self.txtTelefono.text()
+            direccion = self.txtDireccion.text()
 
-    def convert_cv_qt(self, cv_img):
-        """Convert from an opencv image to QPixmap"""
-        rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
-        h, w, ch = rgb_image.shape
-        bytes_per_line = ch * w
-        convert_to_Qt_format = QtGui.QImage(rgb_image.data, w, h, bytes_per_line, QtGui.QImage.Format_RGB888)
-        p = convert_to_Qt_format.scaled(320, 320, Qt.KeepAspectRatio)
-        return QPixmap.fromImage(p)
+            if ci:
+                if nombre:
+                    if apellido:
+                        nombre = self.normalize_name(nombre.split()[0])
+                        image_path = f'images/faces/{nombre}_{ci}.jpg' if self.lblFoto.pixmap() else ''
+                        strsql = "INSERT INTO cliente (ci, nombre, apellido, telefono, direccion, foto) VALUES('{}', '{}', '{}', '{}', '{}', '{}')".format(
+                            ci,
+                            nombre,
+                            apellido,
+                            telefono,
+                            direccion,
+                            image_path
+                        )
 
-    def saveImage(self, name):
+                        conn = conndb.conndb()
+                        try:
+                            conn.queryExecute(strsql)
+                            # guardar foto
+                            self.save_image(f'{nombre.split()[0]}_{ci}')
+                            # mostrar la pestaña 0 (lista de clientes)
+                            self.tabWidget.setCurrentIndex(0)
+                            self.load_data()
+                            QMessageBox.about(self, "Nuevo Cliente", "Los datos del cliente se guardaron correctamente")
+                        except Exception as e:
+                            QMessageBox.about(self, "Error", "Hubo un error al guardar los datos del cliente")
+                    else:
+                        QMessageBox.about(self, "Error", "El campo Apellido es obligatorio")
+                else:
+                    QMessageBox.about(self, "Error", "El campo Nombre es obligatorio")
+            else:
+                QMessageBox.about(self, "Error", "El campo C.I. Nro. es obligatorio")
+
+    def update_data(self):
+        """ función para actualizar los datos del usuario seleccionado """
+        if self.tabWidget.tabText(1) == "Editar Cliente":
+            id = self.txtId.text()
+            ci = self.txtCI.text()
+            nombre = self.txtNombre.text()
+            apellido = self.txtApellido.text()
+            telefono = self.txtTelefono.text()
+            direccion = self.txtDireccion.text()
+            activo = int(self.chkActivo.isChecked())
+
+            if ci:
+                if nombre:
+                    if apellido:
+                        nombre = self.normalize_name(nombre.split()[0])
+                        image_path = f'images/faces/{nombre}_{ci}.jpg' if self.lblFoto.pixmap() else ''
+                        strsql = "UPDATE cliente SET ci='{}', nombre='{}', apellido='{}', telefono='{}', direccion='{}', foto='{}', activo='{}' WHERE id='{}'".format(
+                            ci,
+                            nombre,
+                            apellido,
+                            telefono,
+                            direccion,
+                            image_path,
+                            activo,
+                            id
+                        )
+
+                        conn = conndb.conndb()
+                        try:
+                            conn.queryExecute(strsql)
+                            # eliminar foto si cambió su nombre
+                            if image_path != self.image_path:
+                                self.delete_image(self.image_path)
+
+                            # guardar foto
+                            self.save_image(f'{nombre.split()[0]}_{ci}')
+
+                            self.tabWidget.setTabText(1, "Nuevo Cliente")
+                            # mostrar la pestaña 0 (lista de clientes)
+                            self.tabWidget.setCurrentIndex(0)
+                            self.load_data()
+                            QMessageBox.about(self, "Editar Cliente", "Los datos del cliente se actualizaron correctamente")
+                        except Exception as e:
+                            QMessageBox.about(self, "Error", "Hubo un error al actualizar los datos del cliente")
+                    else:
+                        QMessageBox.about(self, "Error", "El campo Apellido es obligatorio")
+                else:
+                    QMessageBox.about(self, "Error", "El campo Nombre es obligatorio")
+            else:
+                QMessageBox.about(self, "Error", "El campo C.I. Nro. es obligatorio")
+        else:
+            self.save_data()
+
+    def save_image(self, name):
         pixmap = self.lblFoto.pixmap()
 
         if pixmap is None:
@@ -184,115 +297,22 @@ class cliente(QtWidgets.QWidget):
         # Guardar la imagen
         resized_image.save(os.path.join(save_dir, f"{name}.jpg"))
 
-    def loadData(self):
-        """ función para cargar los datos del uruario en la tabla """
-        conn = conndb.conndb()
-        strsql = "SELECT * FROM cliente"
-        result = conn.queryResult(strsql)
-        row = 0
-        self.tableWidget.setRowCount(len(result))
-        for r in result:
-            self.tableWidget.setItem(row, 0, QtWidgets.QTableWidgetItem(str(r[0])))
-            self.tableWidget.setItem(row, 1, QtWidgets.QTableWidgetItem(r[1]))
-            self.tableWidget.setItem(row, 2, QtWidgets.QTableWidgetItem(r[2]))
-            self.tableWidget.setItem(row, 3, QtWidgets.QTableWidgetItem(r[3]))
-            self.tableWidget.setItem(row, 4, QtWidgets.QTableWidgetItem(r[4]))
-            self.tableWidget.setItem(row, 5, QtWidgets.QTableWidgetItem(r[5]))
-            self.tableWidget.setItem(row, 6, QtWidgets.QTableWidgetItem(r[6]))
-            self.tableWidget.setItem(row, 7, QtWidgets.QTableWidgetItem(str(r[7])))
-            row = row + 1
+    def delete_image(self, image_path):
+        try:
+            os.remove(image_path)
+            print(f"Archivo {image_path} eliminado exitosamente.")
+        except FileNotFoundError:
+            print(f"El archivo {image_path} no existe.")
+        except Exception as e:
+            print(f"Error al eliminar el archivo {image_path}: {e}")
 
-    def updateData(self):
-        """ función para actualizar los datos del usuario seleccionado """
-        if self.tabWidget.tabText(1) == "Editar Cliente":
-            id = self.txtId.text()
-            ci = self.txtCI.text()
-            nombre = self.txtNombre.text()
-            apellido = self.txtApellido.text()
-            telefono = self.txtTelefono.text()
-            direccion = self.txtDireccion.text()
-            activo = int(self.chkActivo.isChecked())
-
-            if ci:
-                if nombre:
-                    if apellido:
-                        image_path = f'images/faces/{nombre.split()[0]}_{ci}.jpg' if self.lblFoto.pixmap() else ''
-                        strsql = "UPDATE cliente SET ci='{}', nombre='{}', apellido='{}', telefono='{}', direccion='{}', foto='{}', activo='{}' WHERE id='{}'".format(
-                            ci,
-                            nombre,
-                            apellido,
-                            telefono,
-                            direccion,
-                            image_path,
-                            activo,
-                            id
-                        )
-
-                        conn = conndb.conndb()
-                        try:
-                            conn.queryExecute(strsql)
-                            self.tabWidget.setTabText(1, "Nuevo Cliente")
-                            # mostrar la pestaña 0 (lista de clientes)
-                            self.tabWidget.setCurrentIndex(0)
-                            self.loadData()
-                            # guardar foto
-                            self.saveImage(nombre.split()[0] + '_' + ci)
-                            QMessageBox.about(self, "Editar Cliente", "Los datos del cliente se actualizaron correctamente")
-                        except Exception as e:
-                            QMessageBox.about(self, "Error", "Hubo un error al actualizar los datos del cliente")
-                    else:
-                        QMessageBox.about(self, "Error", "El campo Apellido es obligatorio")
-                else:
-                    QMessageBox.about(self, "Error", "El campo Nombre es obligatorio")
-            else:
-                QMessageBox.about(self, "Error", "El campo C.I. Nro. es obligatorio")
-        else:
-            self.saveData()
-
-    def saveData(self):
-        """ función para actualizar los datos del usuario seleccionado """
-        if self.tabWidget.tabText(1) == "Nuevo Cliente":
-            ci = self.txtCI.text()
-            nombre = self.txtNombre.text()
-            apellido = self.txtApellido.text()
-            telefono = self.txtTelefono.text()
-            direccion = self.txtDireccion.text()
-
-            if ci:
-                if nombre:
-                    if apellido:
-                        image_path = f'images/faces/{nombre.split()[0]}_{ci}.jpg' if self.lblFoto.pixmap() else ''
-                        strsql = "INSERT INTO cliente (ci, nombre, apellido, telefono, direccion, foto) VALUES('{}', '{}', '{}', '{}', '{}', '{}')".format(
-                            ci,
-                            nombre,
-                            apellido,
-                            telefono,
-                            direccion,
-                            image_path
-                        )
-
-                        conn = conndb.conndb()
-                        try:
-                            conn.queryExecute(strsql)
-                            # guardar foto
-                            self.saveImage(f'{nombre.split()[0]}_{ci}')
-                            # mostrar la pestaña 0 (lista de clientes)
-                            self.tabWidget.setCurrentIndex(0)
-                            self.loadData()
-                            QMessageBox.about(self, "Nuevo Cliente", "Los datos del cliente se guardaron correctamente")
-                        except Exception as e:
-                            QMessageBox.about(self, "Error", "Hubo un error al guardar los datos del cliente")
-                    else:
-                        QMessageBox.about(self, "Error", "El campo Apellido es obligatorio")
-                else:
-                    QMessageBox.about(self, "Error", "El campo Nombre es obligatorio")
-            else:
-                QMessageBox.about(self, "Error", "El campo C.I. Nro. es obligatorio")
-
-    def deleteData(self):
+    def delete_data(self):
         """ funcion para eliminar los datos del usuario seleccionado """
         # capturar la fila seleccionada
         row = self.tableWidget.currentRow()
+        image_path =self.tableWidget.item(row, 6).text()
+        if image_path:
+            self.delete_image(image_path)
 
         if row >= 0:
         # capturar los datos de cada celda de la fila seleccionada y guardar en varuables
@@ -301,9 +321,9 @@ class cliente(QtWidgets.QWidget):
             conn = conndb.conndb()
             conn.queryExecute(strsql)
             QMessageBox.about(self, "Eliminar Cliente", "Cliente eliminado correctamente")
-            self.loadData()
+            self.load_data()
 
-    def getItem(self):
+    def get_item(self):
         """ funcion para mostrar en las cajas de texto los datos del usuario seleccionado de la tabla """
         # capturar la fila seleccionada
         row = self.tableWidget.currentRow()
@@ -317,7 +337,7 @@ class cliente(QtWidgets.QWidget):
             apellido = self.tableWidget.item(row, 3).text()
             telefono = self.tableWidget.item(row, 4).text()
             direccion = self.tableWidget.item(row, 5).text()
-            imagePath =self.tableWidget.item(row, 6).text()
+            image_path =self.tableWidget.item(row, 6).text()
             activo = self.tableWidget.item(row, 7).text()
 
             # cargar las cajas de texto con los datos del cliente
@@ -327,9 +347,13 @@ class cliente(QtWidgets.QWidget):
             self.txtApellido.setText(apellido)
             self.txtTelefono.setText(telefono)
             self.txtDireccion.setText(direccion)
-            if imagePath:
-                pixmap = QPixmap(imagePath).scaled(320, 320, aspectRatioMode=Qt.KeepAspectRatio)
+            if image_path:
+                pixmap = QPixmap(image_path).scaled(320, 320, aspectRatioMode=Qt.KeepAspectRatio)
                 self.lblFoto.setPixmap(pixmap)
+            else:
+                self.lblFoto.clear()
+            self.image_path = image_path
+
             self.chkActivo.setChecked(int(activo))
 
             # mostrar caja de texto para ID y CheckBox para Activo
@@ -373,3 +397,6 @@ class cliente(QtWidgets.QWidget):
         self.tabWidget.setTabText(1, "Nuevo Cliente")
         # mostrar la pestaña 0 (lista de clientes)
         self.tabWidget.setCurrentIndex(0)
+
+    def normalize_name(self, name):
+        return unidecode(name)
