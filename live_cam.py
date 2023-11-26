@@ -31,7 +31,10 @@ class VideoThread(QThread):
             facesEncodings.append(f_coding)
             facesNames.append(file_name.split(".")[0])
         # LEYENDO VIDEO
-        cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        # cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        # cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
+        cap = cv2.VideoCapture(0)
+        
         # Detector facial
         faceClassif = cv2.CascadeClassifier(
             cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
@@ -47,7 +50,7 @@ class VideoThread(QThread):
                 frame,
                 scaleFactor=1.1,
                 minNeighbors=10,
-                minSize=(50, 50)
+                minSize=(30, 30)
             )
 
             for (x, y, w, h) in faces:
@@ -65,7 +68,7 @@ class VideoThread(QThread):
                     cv2.putText(frame, name, (x, y + h + 25), 2, 1, (255, 255, 255), 2, cv2.LINE_AA)
                 # else:
                     # name = "Desconocido"
-                    # color = (50, 50, 255)
+                    # color = (30, 30, 255)
                 # cv2.rectangle(frame, (x, y + h), (x + w, y + h + 30), color, -1)
                 # cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
                 # cv2.putText(frame, name, (x, y + h + 25), 2, 1, (255, 255, 255), 2, cv2.LINE_AA)
@@ -82,7 +85,7 @@ class VideoThread(QThread):
         self.wait()
 
 
-class live_cam(QWidget):
+class LiveCam(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)

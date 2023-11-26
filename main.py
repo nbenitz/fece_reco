@@ -1,23 +1,25 @@
 # This Python file uses the following encoding: utf-8
 import sys
+import os
 
 from PyQt5 import QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QMessageBox
 
 import user_management as usr_mgt
 import login
-import live_cam
+from live_cam import LiveCam
 import cliente
 
 
 class main(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        os.environ["QT_QPA_PLATFORM"] = "xcb"
         uic.loadUi("main.ui", self)
         self.setWindowTitle("Identificación de Antecedentes")
         self.showMaximized()
 
-        self.logout()
+        #self.logout()
         self.actionLogin.triggered.connect(self.login)
         self.actionLogout.triggered.connect(self.logout)
         self.actionIniciar_Camara.triggered.connect(self.l_cam)
@@ -58,7 +60,7 @@ class main(QtWidgets.QMainWindow):
         for w in self.mdiArea.subWindowList():
             self.mdiArea.removeSubWindow(w)
 
-        self.live_cam = live_cam.live_cam()
+        self.live_cam = LiveCam()
 
         mdi = self.mdiArea.addSubWindow(self.live_cam, QtCore.Qt.FramelessWindowHint)
         self.live_cam.setGeometry(0, 0, 660, 500)

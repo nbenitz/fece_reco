@@ -8,6 +8,11 @@ import cv2
 import imutils
 import numpy as np
 import conndb
+from PyQt5.QtGui import QImage
+from PyQt5.QtCore import QBuffer
+from PIL import Image
+import io
+import os
 
 
 class VideoThread(QThread):
@@ -23,7 +28,7 @@ class VideoThread(QThread):
         cascPath = "haarcascade_frontalface_default.xml"
         faceClassif = cv2.CascadeClassifier(cascPath)
         # LEYENDO VIDEO
-        cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        cap = cv2.VideoCapture(0)
         print("_run_flag 1:", self._run_flag)
         while self._run_flag:
             ret, frame = cap.read()
@@ -164,9 +169,31 @@ class cliente(QtWidgets.QWidget):
 
 
     def saveImage(self, name):
-        image = ImageQt.fromqpixmap(self.lblFoto.pixmap())
-        image.save('images/faces/'+name+'.jpg')
+        pixmap = self.lblFoto.pixmap()
 
+        if pixmap.isNull():
+            QMessageBox.about(self, "Editar Cliente", "El pixmap es nulo. No se puede guardar la imagen.")
+            return
+
+        # Verificar la existencia del directorio de destino
+        save_dir = 'images/faces/'
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+
+        # Convertir el QPixmap a QImage
+        qimage = pixmap.toImage()
+
+        # Convertir la QImage a un búfer de bytes
+        buffer = QBuffer()
+        buffer.open(QBuffer.ReadWrite)
+        qimage.save(buffer, "PNG")
+
+        # Convertir el búfer de bytes a una imagen de Pillow
+        buffer.seek(0)
+        image = Image.open(io.BytesIO(buffer.data()))
+
+        # Guardar la imagen
+        image.save(os.path.join(save_dir, f"{name}.jpg"))
 
     def loadData(self):     # función para cargar los datos del uruario en la tabla
         conn = conndb.conndb()
@@ -209,18 +236,17 @@ class cliente(QtWidgets.QWidget):
             conn = conndb.conndb()
             try:
                 conn.queryExecute(strsql)
-                QMessageBox.about(self, "Editar Cliente", "Los datos del cliente se actualizaron correctamente")
                 self.tabWidget.setTabText(1, "Nuevo Cliente")
                 # mostrar la pestaña 0 (lista de clientes)
                 self.tabWidget.setCurrentIndex(0)
                 self.loadData()
                 # guardar foto
                 self.saveImage(nombre.split()[0] + '_' + ci)
-            except:
+                QMessageBox.about(self, "Editar Cliente", "Los datos del cliente se actualizaron correctamente")
+            except Exception as e:
                 QMessageBox.about(self, "Error", "Hubo un error al actualizar los datos del cliente")
         else:
             self.saveData()
-
 
     # función para actualizar los datos del usuario seleccionado
     def saveData(self):
@@ -251,7 +277,6 @@ class cliente(QtWidgets.QWidget):
             except:
                 QMessageBox.about(self, "Error", "Hubo un error al guardar los datos del cliente")
 
-
     def deleteData(self):    # funcion para eliminar los datos del usuario seleccionado
         # capturar la fila seleccionada
         row = self.tableWidget.currentRow()
@@ -264,7 +289,6 @@ class cliente(QtWidgets.QWidget):
             conn.queryExecute(strsql)
             QMessageBox.about(self, "Eliminar Cliente", "Cliente eliminado correctamente")
             self.loadData()
-
 
     # funcion para mostrar en las cajas de texto los datos del usuario seleccionado de la tabla
     def getItem(self):
@@ -327,8 +351,6 @@ class cliente(QtWidgets.QWidget):
             if self.btnCamara.text() == "Capturar":
                 self.thread.stop()
                 self.btnCamara.setText("Iniciar Cámara")
-
-
 
     def cancelar(self):
         self.tabWidget.setTabText(1, "Nuevo Cliente")
