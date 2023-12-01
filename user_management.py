@@ -15,7 +15,7 @@ class UserManagement(QtWidgets.QWidget):
         header.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
 
-        self.pushButton.clicked.connect(self.load_data)
+        # self.pushButton.clicked.connect(self.load_data)
         self.pushButton_Guardar.clicked.connect(self.save_data)
         self.pushButton_Eliminar.clicked.connect(self.delet_data)
         self.tableWidget.clicked.connect(self.get_item)
@@ -37,18 +37,30 @@ class UserManagement(QtWidgets.QWidget):
             row = row + 1
 
     def save_data(self):
-        """ función para actualizar los datos del usuario seleccionado """
+        """ función para crear o actualizar los datos del usuario seleccionado """
         id = self.lineEdit_Id.text()
         username = self.lineEdit_Username.text()
         password = self.lineEdit_Pass.text()
         privilegio = self.comboBox_Privilegio.currentText()
         activo = int(self.checkBox_Activo.isChecked())
-        strsql = "UPDATE usuario SET nombre='{}', pass='{}', privilegio='{}', activo='{}' WHERE id='{}'".format(
-            username,
-            password,
-            privilegio,
-            activo,
-            id)
+
+        if id:
+            strsql = "UPDATE usuario SET nombre='{}', pass='{}', privilegio='{}', activo='{}' WHERE id='{}'".format(
+                username,
+                password,
+                privilegio,
+                activo,
+                id
+            )
+        else:
+            strsql = "INSERT INTO usuario (nombre, pass, privilegio, activo) VALUES('{}', '{}', '{}', '{}')".format(
+                username,
+                password,
+                privilegio,
+                activo,
+            )
+            self.lineEdit_Username.text('')
+            self.lineEdit_Pass.text('')
 
         conn = conndb.conndb()
         conn.queryExecute(strsql)

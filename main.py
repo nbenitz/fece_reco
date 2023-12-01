@@ -53,7 +53,6 @@ class main(QtWidgets.QMainWindow):
 
     def clientes_show(self):
         self.clientes_frm = Cliente()
-        # self.mdiArea.addSubWindow(self.clientes_frm)
         self.clientes_frm.show()
 
     def l_cam(self):
@@ -78,6 +77,6 @@ rect = screen.availableGeometry()
 # print('Available: %d x %d' % (rect.width(), rect.height()))
 
 widget = main()
-widget.mdiArea.resize(rect.width() - 30, rect.height() - 70)
+widget.mdiArea.resize(rect.width() - 20, rect.height() - 60)
 widget.show()
 app.exec()

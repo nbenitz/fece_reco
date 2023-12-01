@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>550</width>
-    <height>435</height>
+    <width>860</width>
+    <height>540</height>
    </rect>
   </property>
   <property name="font">
@@ -18,26 +18,13 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QPushButton" name="pushButton">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>180</y>
-     <width>111</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Ver Usuarios</string>
-   </property>
-  </widget>
   <widget class="QTableWidget" name="tableWidget">
    <property name="geometry">
     <rect>
      <x>20</x>
      <y>220</y>
-     <width>511</width>
-     <height>192</height>
+     <width>821</width>
+     <height>271</height>
     </rect>
    </property>
    <column>
@@ -180,8 +167,8 @@
   <widget class="QPushButton" name="pushButton_Guardar">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>180</y>
+     <x>290</x>
+     <y>170</y>
      <width>111</width>
      <height>31</height>
     </rect>
@@ -229,8 +216,8 @@
   <widget class="QPushButton" name="pushButton_Eliminar">
    <property name="geometry">
     <rect>
-     <x>260</x>
-     <y>180</y>
+     <x>730</x>
+     <y>500</y>
      <width>111</width>
      <height>31</height>
     </rect>
